@@ -1,6 +1,11 @@
+# Ignorer tous les fichiers Excel
 *.xlsx
 *.xls
-*.csv
+
+# MAIS inclure le fichier modèle d'exemple dans le dossier data/
+!Modèle_Calcul_ETP-Thornthwaite.xlsx
+
+# Ignorer les fichiers temporaires et d'environnement R
 .Rproj.user/
 *.Rhistory
 *.RData
