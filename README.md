@@ -15,7 +15,7 @@ Le script principal (`main_etp_thornthwaite.R`) propose un menu interactif lors 
    - Prise en compte de la variabilité journalière de la température et du calcul dynamique de la durée astronomique du jour (`N_j`) selon la latitude et la déclinaison solaire.
 3. **Gestion Automatique de la Latitude :**
    - **Détection intelligente de l'hémisphère :** Le script lit simplement l'en-tête de votre colonne Excel (`Latitude_Nord` ou `Latitude_Sud`) pour identifier l'hémisphère géographique de la station.
-   - **Ajustement astronomique automatique :** Les formules de déclinaison solaire et le calcul de la durée du jour s'adaptent mathématiquement en coulisses (valeurs positives ou négatives) sans aucune intervention de l'utilisateur.
+   - **Ajustement astronomique automatique :** Les formules de déclinaison solaire et le calcul de la durée du jour s'adaptent mathématiquement en coulisses sans que l'utilisateur n'ait à se soucier d'appliquer des signes négatifs.
    - **Traitement par lot multi-hémisphères :** Vous pouvez traiter simultanément plusieurs stations issues du Nord et du Sud au sein d'un même fichier Excel (en les plaçant sur des feuilles distinctes), le script s'ajustera dynamiquement à chaque itération.
 
 ---

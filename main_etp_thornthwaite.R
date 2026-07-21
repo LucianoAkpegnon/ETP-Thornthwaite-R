@@ -55,15 +55,13 @@
 # Ce script détecte automatiquement la colonne de latitude
 # selon son nom dans le fichier Excel d'entrée :
 #
-#   👉 "Latitude_Nord" → Latitude positive (hémisphère Nord)
-#   👉 "Latitude_Sud"  → Latitude négative (hémisphère Sud)
+#   👉 "Latitude_Nord" → Hémisphère Nord
+#   👉 "Latitude_Sud"  → Hémisphère Sud
 #
-# Il adapte ensuite automatiquement les calculs de la durée
-# astronomique du jour en fonction de la position géographique.
-#
-# ⚠️ Assurez-vous qu’un seul de ces deux noms soit présent
-# dans chaque feuille, et qu’aucune autre colonne n’utilise
-# le mot "Latitude_" dans son nom.
+# ⚠️ SAISIE DES VALEURS :
+# Saisissez TOUJOURS vos latitudes en valeurs absolues (positives), 
+# même pour les stations du Sud. C'est l'en-tête de la colonne qui 
+# indiquera au script d'appliquer le signe négatif en arrière-plan.
 #
 # ➕ Ce système permet de traiter en lot plusieurs stations issues
 # des deux hémisphères, dans un même fichier (sur plusieurs feuilles) 
@@ -74,7 +72,7 @@
 # ===============================================================
 
 #==================== CHARGEMENT DES PACKAGES ====================
-packages <- c("readxl", "openxlsx", "dplyr", "rstudioapi", "beepr")
+packages <- c("readxl", "openxlsx", "dplyr", "rstudioapi")
 lapply(packages, function(pkg) {
   if (!require(pkg, character.only = TRUE)) install.packages(pkg)
   library(pkg, character.only = TRUE)
@@ -86,7 +84,6 @@ avertir_popup <- function(message) {
   cat("\n", ruban, "\n")
   cat("🔔 ", toupper(message), "\n")
   cat(ruban, "\n\n")
-  beepr::beep(2)
 }
 
 #==================== CALCUL DURÉE DU JOUR ====================
