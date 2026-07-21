@@ -1,7 +1,12 @@
 # ===============================================================
 # 📌 CALCUL AUTOMATIQUE DE L’ETP AVEC THORNTHWAITE
-#    Option : Mensuelle OU Journalière redistribuée
+# 
+# Auteur : AKPEGNON Luciano Arnold
+# Date de création / mise à jour : 2026
+# Description : Calcul de l'ETP mensuelle et journalière redistribuée
+# Contact / GitHub : https://github.com/LucianoAkpegnon
 # ===============================================================
+
 
 # ===============================================================
 # 📌 MÉTHODOLOGIE : Adaptation de Thornthwaite pour l’ETP journalière
