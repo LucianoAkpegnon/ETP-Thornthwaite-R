@@ -7,62 +7,71 @@
 # Contact / GitHub : https://github.com/LucianoAkpegnon
 # ===============================================================
 
-
 # ===============================================================
-# 📌 MÉTHODOLOGIE : Adaptation de Thornthwaite pour l’ETP journalière
-#FORMULE DE THORNTHWAITE : ETP_mens = 16 * (Nm / 12) * (10 * T_moy / I)^a
-
+# 📌 MÉTHODOLOGIE : CALCUL DE L'ETP (THORNTHWAITE 1948)
+#
+# ---------------------------------------------------------------
+# 1️⃣ MÉTHODE CLASSIQUE : ETP MENSUELLE
+# ---------------------------------------------------------------
+# FORMULE DE THORNTHWAITE : ETP_mens = 16 * (Nm / 12) * (10 * T_moy_mens / I)^a
+#
 # Avec :
-# - ETP_mens : évapotranspiration potentielle mensuelle (mm/mois)
-# - T_moy   : température moyenne mensuelle (°C), si <0 alors 0
-# - Nm      : durée moyenne du jour pour le mois (heures)
-# - I       : indice thermique annuel = Σ (T_moy/5)^1.514 sur 12 mois
-# - a       : coefficient empirique = 6.75e-7*I^3 - 7.71e-5*I^2 + 1.792e-2*I + 0.49239
+# - ETP_mens   : évapotranspiration potentielle mensuelle (mm/mois)
+# - T_moy_mens : température moyenne mensuelle (°C). Si T_moy_mens < 0, on prend 0.
+# - Nm         : durée théorique moyenne du jour pour le mois considéré (heures)
+# - I          : indice thermique annuel = Σ (T_moy_mens / 5)^1.514 (somme sur 12 mois)
+# - a          : coefficient empirique fonction de I 
+#                a = 6.75e-7 * I^3 - 7.71e-5 * I^2 + 1.792e-2 * I + 0.49239
 #
-# NOTE : T_moy < 0°C → contribution = 0 pour l'indice I
-# La formule de Thornthwaite (1948) est initialement conçue
-
-
-# pour l’ETP mensuelle. Pour obtenir une estimation journalière,
-# la méthode a été adaptée comme suit :
+# ---------------------------------------------------------------
+# 2️⃣ ADAPTATION : ETP JOURNALIÈRE REDISTRIBUÉE
+# ---------------------------------------------------------------
+# La formule de Thornthwaite (1948) est initialement conçue pour le pas 
+# de temps mensuel. Pour obtenir une estimation journalière cohérente, 
+# la méthode a été adaptée par une approche de redistribution proportionnelle :
 #
-# 1) Indice thermique annuel (I)
-#    I = Σ (T/5)^1.514   (somme sur les mois > 0 °C)
+# a) Durée astronomique du jour (N_j)
+#    Calculée pour chaque jour j en fonction de la latitude du site et 
+#    de la déclinaison solaire journalière.
 #
-# 2) Coefficient empirique (a)
-#    a = 6.75e-7 * I^3 - 7.71e-5 * I^2 + 1.792e-2 * I + 0.49239
+# b) Calcul de l'ETP mensuelle globale (ETP_mens)
+#    Calculée avec la méthode classique détaillée ci-dessus (étape 1).
 #
-# 3) Durée astronomique du jour (N_j)
-#    - Calculée pour chaque jour en fonction de la latitude
-#      et de la déclinaison solaire journalière.
+# c) Redistribution Journalière (ETP_jour)
+#    L'ETP mensuelle est ensuite redistribuée sur chaque jour du mois 
+#    au pro-rata d'un poids journalier (P_j) combinant température et insolation.
+#    
+#    P_j = T_j * N_j   (avec T_j = 0 si température journalière < 0)
+#    ETP_jour = ETP_mens * (P_j / Somme(P_j du mois))
 #
-# 4) Formule journalière adaptée
-#    ETP_j = 16 * (N_j / 12) * ((10 * T_j / I)^a)
+# d) Avantage de l'adaptation
+#    Cette méthode conserve rigoureusement le volume évaporatoire mensuel 
+#    de Thornthwaite, tout en distribuant la demande évaporatoire selon 
+#    la variabilité journalière réelle de la température et de la photopériode.
 #
-#    avec :
-#    - N_j : durée du jour au jour j (h)
-#    - T_j : température moyenne journalière (°C)
-#    - I   : indice thermique annuel
-#    - a   : coefficient empirique
+# ---------------------------------------------------------------
+# 3️⃣ GESTION AUTOMATIQUE DE LA LATITUDE ET DE L’HÉMISPHÈRE
+# ---------------------------------------------------------------
+# Ce script détecte automatiquement la colonne de latitude
+# selon son nom dans le fichier Excel d'entrée :
 #
-# 5) Avantage
-#    Cette adaptation conserve la logique de Thornthwaite,
-#    mais intègre la variabilité journalière de la température
-#    et de la photopériode → cohérence entre ETP journalière
-#    et ETP mensuelle.
+#   👉 "Latitude_Nord" → Latitude positive (hémisphère Nord)
+#   👉 "Latitude_Sud"  → Latitude négative (hémisphère Sud)
 #
-# ---------------- PSEUDO-CODE SIMPLIFIÉ ----------------
-# Pour chaque année :
-#   - Calculer I et a
-#   Pour chaque jour j :
-#       - Calculer la déclinaison solaire δ
-#       - Calculer N_j (durée du jour)
-#       - Récupérer T_j (température du jour)
-#       - Calculer ETP_j avec la formule adaptée
-
-#BIBLIOGRAPHIE : Thornthwaite, C.W. An approach toward a rational classification of climate. Geographical Review, 38(1), 55–94. 1948.
+# Il adapte ensuite automatiquement les calculs de la durée
+# astronomique du jour en fonction de la position géographique.
+#
+# ⚠️ Assurez-vous qu’un seul de ces deux noms soit présent
+# dans chaque feuille, et qu’aucune autre colonne n’utilise
+# le mot "Latitude_" dans son nom.
+#
+# ➕ Ce système permet de traiter en lot plusieurs stations issues
+# des deux hémisphères, dans un même fichier (sur plusieurs feuilles) 
+# ou dans un même répertoire.
+#
+# BIBLIOGRAPHIE : Thornthwaite, C.W. An approach toward a rational 
+# classification of climate. Geographical Review, 38(1), 55–94. 1948.
 # ===============================================================
-
 
 #==================== CHARGEMENT DES PACKAGES ====================
 packages <- c("readxl", "openxlsx", "dplyr", "rstudioapi", "beepr")
@@ -117,15 +126,15 @@ calcul_etp_thornthwaite <- function(df) {
   
   I_par_an <- df %>%
     group_by(AN) %>%
-    summarise(I = sum((pmax(T_moy_moy, 0) / 5)^1.514))
+    summarise(I = sum((pmax(T_moy_mens, 0) / 5)^1.514))
   
   df <- df %>% left_join(I_par_an, by = "AN")
   df <- df %>% mutate(
     a = 6.75e-7 * I^3 - 7.71e-5 * I^2 + 1.792e-2 * I + 0.49239,
-    ETP = 16 * (Lm / 12) * (Nm / 30) * ((10 * T_moy_moy / I)^a)
+    ETP = 16 * (Lm / 12) * (Nm / 30) * ((10 * T_moy_mens / I)^a)
   )
   
-  return(df %>% select(AN, MOIS, Latitude_finale, T_moy_moy, Nm, Lm, I, a, ETP))
+  return(df %>% select(AN, MOIS, Latitude_finale, T_moy_mens, Nm, Lm, I, a, ETP))
 }
 
 #==================== CALCUL ETP JOURNALIÈRE ====================
@@ -157,7 +166,7 @@ calcul_etp_thornthwaite_journalier <- function(df) {
   df_mois <- df %>%
     group_by(AN, MOIS, Latitude_finale) %>%
     summarise(
-      T_moy_moy = mean(T_jour, na.rm = TRUE),
+      T_moy_mens = mean(T_jour, na.rm = TRUE),
       Nm = n(),
       Lm = mean(D_jour, na.rm = TRUE),
       .groups = "drop"
@@ -165,12 +174,12 @@ calcul_etp_thornthwaite_journalier <- function(df) {
   
   I_par_an <- df_mois %>%
     group_by(AN) %>%
-    summarise(I = sum((pmax(T_moy_moy, 0) / 5)^1.514), .groups = "drop")
+    summarise(I = sum((pmax(T_moy_mens, 0) / 5)^1.514), .groups = "drop")
   
   df_mois <- df_mois %>% left_join(I_par_an, by = "AN") %>%
     mutate(
       a = 6.75e-7 * I^3 - 7.71e-5 * I^2 + 1.792e-2 * I + 0.49239,
-      ETP_mens = 16 * (Lm / 12) * (Nm / 30) * ((10 * T_moy_moy / I)^a)
+      ETP_mens = 16 * (Lm / 12) * (Nm / 30) * ((10 * T_moy_mens / I)^a)
     )
   
   df <- df %>% left_join(df_mois %>% select(AN, MOIS, ETP_mens), by = c("AN", "MOIS"))
@@ -226,7 +235,7 @@ for (f in fichiers) {
     df <- readxl::read_excel(f, sheet = feuille)
     
     if (mode_calcul == "mensuel") {
-      if (!all(c("AN", "MOIS", "T_moy_moy") %in% names(df)) || !any(grepl("Latitude_", names(df)))) {
+      if (!all(c("AN", "MOIS", "T_moy_mens") %in% names(df)) || !any(grepl("Latitude_", names(df)))) {
         warning(paste("Feuille", feuille, "du fichier", f, "ignorée : colonnes manquantes."))
         next
       }
